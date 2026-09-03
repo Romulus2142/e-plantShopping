@@ -7,57 +7,50 @@ const CartItem = ({ onContinueShopping }) => {
   const cart = useSelector(state => state.cart.items);
   const dispatch = useDispatch();
 
-  // 1. Calcular el monto total de todos los artículos en el carrito
+  // Calcular el monto total de todos los artículos en el carrito
   const calculateTotalAmount = () => {
-    let total = 0;
-    cart.forEach(item => {
-      // Convierte el costo "$15" a número (removiendo el signo '$' si existe)
-      const costNumber = parseFloat(item.cost.toString().replace('$', ''));
-      total += costNumber * item.quantity;
-    });
-    return total;
+    return cart.reduce((total, item) => {
+      const costNumber = parseFloat(item.cost.toString().replace('$', '')) || 0;
+      return total + (costNumber * item.quantity);
+    }, 0).toFixed(2);
   };
 
-  // 2. Manejador para continuar comprando (regresa a la lista de plantas)
+  // Manejar el botón de continuar comprando
   const handleContinueShopping = (e) => {
-    if (e) e.preventDefault();
-    onContinueShopping(e);
-  };
-
-  // 3. Manejador para el botón de Checkout
-  const handleCheckoutShopping = (e) => {
-    alert('Functionality to be added for future reference');
-  };
-
-  // 4. Incrementar la cantidad de un producto
-  const handleIncrement = (item) => {
-    dispatch(updateQuantity({
-      name: item.name,
-      quantity: item.quantity + 1
-    }));
-  };
-
-  // 5. Decrementar la cantidad de un producto (o eliminar si llega a 0)
-  const handleDecrement = (item) => {
-    if (item.quantity > 1) {
-      dispatch(updateQuantity({
-        name: item.name,
-        quantity: item.quantity - 1
-      }));
-    } else {
-      dispatch(removeItem(item.name));
+    if (onContinueShopping) {
+      onContinueShopping(e);
     }
   };
 
-  // 6. Eliminar completamente una planta del carrito
-  const handleRemove = (item) => {
-    dispatch(removeItem(item.name));
+  // Manejar el botón de Checkout (Procesar pago)
+  const handleCheckoutShopping = (e) => {
+    e.preventDefault();
+    alert('Functionality to be added for future reference');
   };
 
-  // 7. Calcular el subtotal por cada tipo de planta (Costo * Cantidad)
+  // Incrementar la cantidad de un producto
+  const handleIncrement = (item) => {
+    dispatch(updateQuantity({ name: item.name, quantity: item.quantity + 1 }));
+  };
+
+  // Decrementar la cantidad de un producto (elimina si llega a 0)
+  const handleDecrement = (item) => {
+    if (item.quantity > 1) {
+      dispatch(updateQuantity({ name: item.name, quantity: item.quantity - 1 }));
+    } else {
+      dispatch(removeItem({ name: item.name }));
+    }
+  };
+
+  // Eliminar un producto del carrito
+  const handleRemove = (item) => {
+    dispatch(removeItem({ name: item.name }));
+  };
+
+  // Calcular el costo total subtotal por cada tipo de planta
   const calculateTotalCost = (item) => {
-    const costNumber = parseFloat(item.cost.toString().replace('$', ''));
-    return costNumber * item.quantity;
+    const costNumber = parseFloat(item.cost.toString().replace('$', '')) || 0;
+    return (costNumber * item.quantity).toFixed(2);
   };
 
   return (
@@ -71,7 +64,7 @@ const CartItem = ({ onContinueShopping }) => {
               <div className="cart-item-name">{item.name}</div>
               <div className="cart-item-cost">${item.cost}</div>
               <div className="cart-item-quantity">
-                <button className="cart-item-button cart-item-button-dec" onClick={() => handleDecrement(item)}>-</button>
+                <button className="cart-item-button cart-item-button-inc" onClick={() => handleDecrement(item)}>-</button>
                 <span className="cart-item-quantity-value">{item.quantity}</span>
                 <button className="cart-item-button cart-item-button-inc" onClick={() => handleIncrement(item)}>+</button>
               </div>
